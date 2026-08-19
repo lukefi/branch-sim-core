@@ -1,12 +1,12 @@
 import sqlite3
 from typing import Sequence
-from lukefi.metsi.app.utils import MetsiException
-from lukefi.metsi.data.computational_unit import ComputationalUnit
-from lukefi.metsi.domain.utils.file_io import NodeType, output_node_to_db
-from lukefi.metsi.sim.collected_data import CollectableDataTypes, init_collected_data_tables
-from lukefi.metsi.sim.sim_control import Updating
-from lukefi.metsi.sim.simulation_payload import SimulationPayload
-from lukefi.metsi.sim.treatment import PredeterminedTreatment
+from lukefi.metsi.core.collected_data import CollectableDataTypes, init_collected_data_tables
+from lukefi.metsi.core.db_utils import NodeType, output_node_to_db
+from lukefi.metsi.core.exceptions import MetsiException
+from lukefi.metsi.core.model import ComputationalUnit
+from lukefi.metsi.core.sim_control import Updating
+from lukefi.metsi.core.simulation_payload import SimulationPayload
+from lukefi.metsi.core.treatment import PredeterminedTreatment
 
 
 def update_units[T: ComputationalUnit](updating_instructions: Updating[T],
@@ -32,11 +32,11 @@ def update_units[T: ComputationalUnit](updating_instructions: Updating[T],
         current = SimulationPayload(unit)
         keep_running = True
         while keep_running:
-            step, treatments = get_step_and_treatments(current.computational_unit, target_time)
+            step, treatments = get_step_and_treatments(current.unit, target_time)
 
             for treatment in treatments:
-                current.computational_unit, cd = treatment(current.computational_unit)
-                current.computational_unit.update_aggregates()
+                current.unit, cd = treatment(current.unit)
+                current.unit.update_aggregates()
                 current.node_id.append(0)
                 if db is not None:
                     output_node_to_db(
@@ -44,29 +44,29 @@ def update_units[T: ComputationalUnit](updating_instructions: Updating[T],
                         current.node_id,
                         treatment.name,
                         treatment.evaluated_params,
-                        current.computational_unit,
+                        current.unit,
                         cd,
                         treatment.tags,
                         output_state=output_treatment_state,
-                        output_collected_data=output_treatment_cd,
+                        output_cd=output_treatment_cd,
                         node_type=NodeType.UPDATING_TREATMENT
                     )
 
             if step > 0:
                 # TODO: This is a bit of a hack. DB stuff should be refactored.
-                current.computational_unit, cd = transition(current, None, step)
-                current.computational_unit.update_aggregates()
+                current.unit, cd = transition(current, None, step)
+                current.unit.update_aggregates()
                 if db is not None:
                     output_node_to_db(
                         db,
                         current.node_id,
                         transition.name,
                         {},
-                        current.computational_unit,
+                        current.unit,
                         cd,
                         tags=None,
                         output_state=transition.db_output_state,
-                        output_collected_data=transition.db_output_cd,
+                        output_cd=transition.db_output_cd,
                         transition_count=1,
                         node_type=NodeType.UPDATING_TRANSITION
                     )
@@ -74,10 +74,10 @@ def update_units[T: ComputationalUnit](updating_instructions: Updating[T],
                 keep_running = False
 
         # Drop performed treatments
-        current.computational_unit.predetermined_treatments = None
+        current.unit.predetermined_treatments = None
 
         # Update starting time for relative timepoints
-        current.computational_unit.start_time = current.computational_unit.time
+        current.unit.start_time = current.unit.time
 
         # TODO: update initial state tables in db?
 

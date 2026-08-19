@@ -1,10 +1,11 @@
 
 import sqlite3
 from typing import Any, Callable, Optional
-from lukefi.metsi.data.computational_unit import ComputationalUnit
-from lukefi.metsi.domain.utils.file_io import NodeType, output_node_to_db
-from lukefi.metsi.sim.collected_data import CollectableDataTypes, OpTuple
-from lukefi.metsi.sim.simulation_payload import SimulationPayload
+
+from lukefi.metsi.core.collected_data import CollectableDataTypes, OpTuple
+from lukefi.metsi.core.db_utils import NodeType, output_node_to_db
+from lukefi.metsi.core.model import ComputationalUnit
+from lukefi.metsi.core.simulation_payload import SimulationPayload
 
 
 type TransitionFn[T: ComputationalUnit] = Callable[[T, int], OpTuple[T]]
@@ -12,6 +13,16 @@ type TransitionInitFn[T: ComputationalUnit] = Callable[[T, dict[str, Any]], None
 
 
 class Transition[T: ComputationalUnit]:
+
+    __slots__ = ("transition_fn",
+                 "parameters",
+                 "init_fn",
+                 "name",
+                 "collected_data",
+                 "db_output_state",
+                 "db_output_cd",
+                 "max_step")
+
     transition_fn: TransitionFn[T]
     parameters: dict[str, Any]
     init_fn: TransitionInitFn[T] | None
@@ -61,7 +72,7 @@ class Transition[T: ComputationalUnit]:
                  transition_count: int = 1) -> OpTuple[T]:
         if self.max_step is not None:
             time_step = min(time_step, self.max_step)
-        new_state, collected_data = self.transition_fn(payload.computational_unit, time_step, **self.parameters)
+        new_state, collected_data = self.transition_fn(payload.unit, time_step, **self.parameters)
 
         if db is not None and (self.db_output_state or self.db_output_cd):
             output_node_to_db(db,
@@ -71,7 +82,7 @@ class Transition[T: ComputationalUnit]:
                               new_state,
                               collected_data,
                               output_state=self.db_output_state,
-                              output_collected_data=self.db_output_cd,
+                              output_cd=self.db_output_cd,
                               transition_count=transition_count,
                               node_type=NodeType.TRANSITION)
 

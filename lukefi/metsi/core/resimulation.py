@@ -4,22 +4,23 @@ import csv
 import sqlite3
 from typing import Any, Set, TypeVar
 
-from lukefi.metsi.data.computational_unit import ComputationalUnit
-from lukefi.metsi.domain.utils.file_io import NodeType, output_node_to_db
-from lukefi.metsi.sim.collected_data import init_collected_data_tables
-from lukefi.metsi.sim.sim_control import Resimulation
-from lukefi.metsi.sim.simulation_payload import SimulationPayload
-from lukefi.metsi.sim.treatment import PredeterminedTreatment, TreatmentFn
-from lukefi.metsi.sim.updating import get_step_and_treatments
+from lukefi.metsi.core.collected_data import init_collected_data_tables
+from lukefi.metsi.core.db_utils import NodeType, output_node_to_db
+from lukefi.metsi.core.model import ComputationalUnit
+from lukefi.metsi.core.sim_control import Resimulation
+from lukefi.metsi.core.simulation_payload import SimulationPayload
+from lukefi.metsi.core.treatment import PredeterminedTreatment, TreatmentFn
+from lukefi.metsi.core.updating import get_step_and_treatments
 
 T = TypeVar("T", bound=ComputationalUnit)
 Schedule = list[tuple[int, PredeterminedTreatment[T]]]
-Schedules = list[Schedule[T]]
 
 
-class UnitInstructions[T: ComputationalUnit]:
+class _UnitInstructions[T: ComputationalUnit]:
+    __slots__ = ("initial_state", "schedules")
+
     initial_state: T
-    schedules: Schedules[T]
+    schedules: list[Schedule[T]]
 
     def __init__(self,
                  initial_state: T) -> None:
@@ -47,48 +48,48 @@ def resimulate_schedules(resim_instructions: Resimulation[T],
             print(f"Schedule {i}:")
             current = SimulationPayload(deepcopy(instructions.initial_state))
             current.node_id[0] = i
-            current.computational_unit.predetermined_treatments = schedule
+            current.unit.predetermined_treatments = schedule
             target_time = max(time for time, _ in schedule)
             should_run = True
             while should_run:
-                step, treatments = get_step_and_treatments(current.computational_unit, target_time)
-                print(f"Year {current.computational_unit.time}")
+                step, treatments = get_step_and_treatments(current.unit, target_time)
+                print(f"Year {current.unit.time}")
                 print(f"treatments: {[treatment.name for treatment in treatments]}")
 
                 for treatment in treatments:
                     print(f"Perform treatment {treatment.name}")
-                    current.computational_unit, cd = treatment(current.computational_unit)
-                    current.computational_unit.update_aggregates()
+                    current.unit, cd = treatment(current.unit)
+                    current.unit.update_aggregates()
                     current.node_id.append(0)
                     output_node_to_db(
                         out_db,
                         current.node_id,
                         treatment.name,
                         treatment.evaluated_params,
-                        current.computational_unit,
+                        current.unit,
                         cd,
                         treatment.tags,
                         output_state=resim_instructions.output_treatment_state,
-                        output_collected_data=resim_instructions.output_treatment_cd,
+                        output_cd=resim_instructions.output_treatment_cd,
                         node_type=NodeType.RESIMULATION_TREATMENT if step > 0 else NodeType.RESIMULATION_TREATMENT_LEAF
                     )
 
                 if step > 0:
-                    print(f"Transition to {current.computational_unit.time + step}, step {step}")
+                    print(f"Transition to {current.unit.time + step}, step {step}")
                     # TODO: This is a bit of a hack. DB stuff should be refactored into the (re)simulation
                     # control object once that branch is merged.
-                    current.computational_unit, cd = transition(current, None, step)
-                    current.computational_unit.update_aggregates()
+                    current.unit, cd = transition(current, None, step)
+                    current.unit.update_aggregates()
                     output_node_to_db(
                         out_db,
                         current.node_id,
                         transition.name,
                         transition.parameters,
-                        current.computational_unit,
+                        current.unit,
                         cd,
                         tags=None,
                         output_state=transition.db_output_state,
-                        output_collected_data=transition.db_output_cd,
+                        output_cd=transition.db_output_cd,
                         transition_count=1,
                         node_type=NodeType.RESIMULATION_TRANSITION
                     )
@@ -99,15 +100,15 @@ def resimulate_schedules(resim_instructions: Resimulation[T],
 def _recreate_instructions(sched_file_path: str,
                            treatment_map: dict[str, TreatmentFn[T]],
                            in_db: sqlite3.Connection,
-                           unit_type: type[T]) -> dict[str, UnitInstructions[T]]:
-    instructions_per_unit: dict[str, UnitInstructions[T]] = {}
+                           unit_type: type[T]) -> dict[str, _UnitInstructions[T]]:
+    instructions_per_unit: dict[str, _UnitInstructions[T]] = {}
     with open(sched_file_path, "r", encoding="utf-8") as sched_file:
         sched_reader = csv.DictReader(sched_file, delimiter=";")
         for schedule_row in sched_reader:
             unit_id, treatments = _recreate_schedule(schedule_row, treatment_map, in_db)
             instructions_per_unit.setdefault(
                 unit_id,
-                UnitInstructions(unit_type.reconstruct_initial_state(unit_id, in_db))
+                _UnitInstructions(unit_type.reconstruct_initial_state(unit_id, in_db))
             ).schedules.append(treatments)
     return instructions_per_unit
 

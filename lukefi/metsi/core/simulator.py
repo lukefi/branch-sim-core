@@ -1,12 +1,12 @@
 from copy import copy
 import sqlite3
 from typing import Optional, Sequence, cast
-from lukefi.metsi.data.computational_unit import ComputationalUnit
-from lukefi.metsi.domain.utils.file_io import NodeType, output_node_to_db, update_leaf_node
-from lukefi.metsi.sim.collected_data import CollectableDataTypes, init_collected_data_tables
-from lukefi.metsi.sim.instructions import SimulationInstruction
-from lukefi.metsi.sim.sim_control import Simulation
-from lukefi.metsi.sim.simulation_payload import SimulationPayload
+from lukefi.metsi.core.collected_data import CollectableDataTypes, init_collected_data_tables
+from lukefi.metsi.core.db_utils import NodeType, output_node_to_db, update_leaf_node
+from lukefi.metsi.core.model import ComputationalUnit
+from lukefi.metsi.core.instructions import SimulationInstruction
+from lukefi.metsi.core.sim_control import Simulation
+from lukefi.metsi.core.simulation_payload import SimulationPayload
 
 
 def simulate_alternatives[T: ComputationalUnit](control: Simulation[T],
@@ -21,18 +21,18 @@ def simulate_alternatives[T: ComputationalUnit](control: Simulation[T],
             payload = cast(SimulationPayload[T], SimulationPayload(unit))
         else:
             payload = unit
-        print(f"Simulating unit {payload.computational_unit.identifier} ({i} of {len(units)})...")
-        payload.computational_unit.update_aggregates()
-        control.transition.initialize(payload.computational_unit)
+        print(f"Simulating unit {payload.unit.identifier} ({i} of {len(units)})...")
+        payload.unit.update_aggregates()
+        control.transition.initialize(payload.unit)
 
         if db is not None:
             # Write initial state to database
-            payload.computational_unit.output_initial_state_to_db(db)
+            payload.unit.output_initial_state_to_db(db)
             output_node_to_db(db,
                               payload.node_id,
                               "do_nothing",
                               {},
-                              payload.computational_unit,
+                              payload.unit,
                               [],
                               {"initial"},
                               node_type=NodeType.INITIAL)
@@ -54,10 +54,10 @@ def _simulate_unit[T: ComputationalUnit](payload: SimulationPayload[T],
                         new_branch,
                         control.instructions,
                         control.transition.max_step)
-                    new_branch.computational_unit, _ = control.transition(new_branch, db, time_step)
-                    new_branch.computational_unit.update_aggregates()
+                    new_branch.unit, _ = control.transition(new_branch, db, time_step)
+                    new_branch.unit.update_aggregates()
                     _simulate_unit(new_branch, control, db, 1)
-                offset += instruction.event_generator.width()
+                offset += instruction.events.width()
         if all_instructions_failed:
             # All instructions had failed conditions. Create one branch to carry on with transition.
             time_step = _find_next_time_step(
@@ -65,8 +65,8 @@ def _simulate_unit[T: ComputationalUnit](payload: SimulationPayload[T],
                 control.instructions,
                 control.transition.max_step)
             transition_count += 1
-            payload.computational_unit, _ = control.transition(payload, db, time_step, transition_count)
-            payload.computational_unit.update_aggregates()
+            payload.unit, _ = control.transition(payload, db, time_step, transition_count)
+            payload.unit.update_aggregates()
             _simulate_unit(payload, control, db, transition_count)
     else:
         # End condition met, update `leaf` column
@@ -77,14 +77,14 @@ def _simulate_unit[T: ComputationalUnit](payload: SimulationPayload[T],
 def _find_next_time_step[T: ComputationalUnit](payload: SimulationPayload[T],
                                                instructions: Sequence[SimulationInstruction[T]],
                                                maximum_step: int):
-    current_time = payload.computational_unit.time
+    current_time = payload.unit.time
     time_points: set[int] = set()
     for instruction in instructions:
         time_points.update(
             filter(
                 lambda t: t > current_time,
                 instruction.time_points(
-                    payload.computational_unit.start_time)))
+                    payload.unit.start_time)))
 
     if time_points:
         next_time_point = min(time_points)
