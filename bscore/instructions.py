@@ -2,10 +2,10 @@ import sqlite3
 from typing import Generator, Optional
 from typing import Sequence as Sequence_
 
-from lukefi.metsi.core.condition import Condition
-from lukefi.metsi.core.generators import Alternatives, EventGenerator, EventGeneratorBase, Sequence
-from lukefi.metsi.core.model import ComputationalUnit
-from lukefi.metsi.core.simulation_payload import SimulationPayload
+from bscore.condition import Condition
+from bscore.generators import Alternatives, EventGenerator, EventGeneratorBase, Sequence
+from bscore.model import ComputationalUnit
+from bscore.simulation_payload import SimulationPayload
 
 
 

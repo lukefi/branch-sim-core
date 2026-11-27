@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
-from lukefi.metsi.core.exceptions import MetsiException
-from lukefi.metsi.core.model import ComputationalUnit
+from bscore.exceptions import MetsiException
+from bscore.model import ComputationalUnit
 
 if TYPE_CHECKING:
-    from lukefi.metsi.core.collected_data import CollectedData
+    from bscore.collected_data import CollectedData
 
 
 def do_nothing[T: ComputationalUnit](data: T, step: Optional[int] = None, **kwargs) -> tuple[T, list["CollectedData"]]:

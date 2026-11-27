@@ -1,14 +1,14 @@
 from dataclasses import dataclass
 from typing import Sequence
 
-from lukefi.metsi.core.collected_data import CollectableDataTypes
-from lukefi.metsi.core.condition import Condition
-from lukefi.metsi.core.initialization import Initialization
-from lukefi.metsi.core.instructions import SimulationInstruction
-from lukefi.metsi.core.model import ComputationalUnit
-from lukefi.metsi.core.preop import PreprocessingOperation
-from lukefi.metsi.core.transition import Transition
-from lukefi.metsi.core.treatment import TreatmentFn
+from bscore.collected_data import CollectableDataTypes
+from bscore.condition import Condition
+from bscore.initialization import Initialization
+from bscore.instructions import SimulationInstruction
+from bscore.model import ComputationalUnit
+from bscore.preop import PreprocessingOperation
+from bscore.transition import Transition
+from bscore.treatment import TreatmentFn
 
 
 @dataclass(slots=True)

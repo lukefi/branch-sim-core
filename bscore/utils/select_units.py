@@ -3,8 +3,8 @@ from typing import Callable, Sequence
 import numpy as np
 import numpy.typing as npt
 
-from lukefi.metsi.core.exceptions import MetsiException
-from lukefi.metsi.core.model import VectorData
+from bscore.exceptions import MetsiException
+from bscore.model import VectorData
 
 
 class TargetType(StrEnum):

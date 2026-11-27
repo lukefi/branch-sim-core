@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING, Any, Optional, Type, overload
 import numpy as np
 import numpy.typing as npt
 
-from lukefi.metsi.core.exceptions import MetsiException
+from bscore.exceptions import MetsiException
 
 
 if TYPE_CHECKING:
-    from lukefi.metsi.core.treatment import PredeterminedTreatment
+    from bscore.treatment import PredeterminedTreatment
 
 type DTypeDeclaration = tuple[npt.DTypeLike, Any]
 
