@@ -1,7 +1,7 @@
 
 from typing import Any, Callable
 
-from lukefi.metsi.core.model import ComputationalUnit
+from bscore.model import ComputationalUnit
 
 
 type InitFn[T: ComputationalUnit] = Callable[[T], None]

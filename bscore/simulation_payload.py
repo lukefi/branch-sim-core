@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import Optional
 
-from lukefi.metsi.core.model import ComputationalUnit, Finalizable
+from bscore.model import ComputationalUnit, Finalizable
 
 type OperationHistory = list[tuple[int, str, dict[str, dict], set[str]]]
 

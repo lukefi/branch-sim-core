@@ -2,10 +2,10 @@
 import sqlite3
 from typing import Any, Callable, Optional
 
-from lukefi.metsi.core.collected_data import CollectableDataTypes, OpTuple
-from lukefi.metsi.core.db_utils import NodeType, output_node_to_db
-from lukefi.metsi.core.model import ComputationalUnit
-from lukefi.metsi.core.simulation_payload import SimulationPayload
+from bscore.collected_data import CollectableDataTypes, OpTuple
+from bscore.db_utils import NodeType, output_node_to_db
+from bscore.model import ComputationalUnit
+from bscore.simulation_payload import SimulationPayload
 
 
 type TransitionFn[T: ComputationalUnit] = Callable[[T, int], OpTuple[T]]

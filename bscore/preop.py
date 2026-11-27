@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Sequence
 
-from lukefi.metsi.core.model import ComputationalUnit
+from bscore.model import ComputationalUnit
 
 
 type PreprocessingFn[T: ComputationalUnit] = Callable[[Sequence[T]], Sequence[T]]

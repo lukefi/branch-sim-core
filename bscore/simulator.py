@@ -1,12 +1,12 @@
 from copy import copy
 import sqlite3
 from typing import Optional, Sequence, cast
-from lukefi.metsi.core.collected_data import CollectableDataTypes, init_collected_data_tables
-from lukefi.metsi.core.db_utils import NodeType, output_node_to_db, update_leaf_node
-from lukefi.metsi.core.model import ComputationalUnit
-from lukefi.metsi.core.instructions import SimulationInstruction
-from lukefi.metsi.core.sim_control import Simulation
-from lukefi.metsi.core.simulation_payload import SimulationPayload
+from bscore.collected_data import CollectableDataTypes, init_collected_data_tables
+from bscore.db_utils import NodeType, output_node_to_db, update_leaf_node
+from bscore.model import ComputationalUnit
+from bscore.instructions import SimulationInstruction
+from bscore.sim_control import Simulation
+from bscore.simulation_payload import SimulationPayload
 
 
 def simulate_alternatives[T: ComputationalUnit](control: Simulation[T],

@@ -1,12 +1,12 @@
 import sqlite3
 from typing import Sequence
-from lukefi.metsi.core.collected_data import CollectableDataTypes, init_collected_data_tables
-from lukefi.metsi.core.db_utils import NodeType, output_node_to_db
-from lukefi.metsi.core.exceptions import MetsiException
-from lukefi.metsi.core.model import ComputationalUnit
-from lukefi.metsi.core.sim_control import Updating
-from lukefi.metsi.core.simulation_payload import SimulationPayload
-from lukefi.metsi.core.treatment import PredeterminedTreatment
+from bscore.collected_data import CollectableDataTypes, init_collected_data_tables
+from bscore.db_utils import NodeType, output_node_to_db
+from bscore.exceptions import MetsiException
+from bscore.model import ComputationalUnit
+from bscore.sim_control import Updating
+from bscore.simulation_payload import SimulationPayload
+from bscore.treatment import PredeterminedTreatment
 
 
 def update_units[T: ComputationalUnit](updating_instructions: Updating[T],

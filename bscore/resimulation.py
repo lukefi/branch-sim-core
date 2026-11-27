@@ -4,13 +4,13 @@ import csv
 import sqlite3
 from typing import Any, Set, TypeVar
 
-from lukefi.metsi.core.collected_data import init_collected_data_tables
-from lukefi.metsi.core.db_utils import NodeType, output_node_to_db
-from lukefi.metsi.core.model import ComputationalUnit
-from lukefi.metsi.core.sim_control import Resimulation
-from lukefi.metsi.core.simulation_payload import SimulationPayload
-from lukefi.metsi.core.treatment import PredeterminedTreatment, TreatmentFn
-from lukefi.metsi.core.updating import get_step_and_treatments
+from bscore.collected_data import init_collected_data_tables
+from bscore.db_utils import NodeType, output_node_to_db
+from bscore.model import ComputationalUnit
+from bscore.sim_control import Resimulation
+from bscore.simulation_payload import SimulationPayload
+from bscore.treatment import PredeterminedTreatment, TreatmentFn
+from bscore.updating import get_step_and_treatments
 
 T = TypeVar("T", bound=ComputationalUnit)
 Schedule = list[tuple[int, PredeterminedTreatment[T]]]

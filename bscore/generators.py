@@ -6,14 +6,14 @@ from typing import Any, Generic, Mapping, TypeVar, override
 from typing import Sequence as Sequence_
 from collections.abc import Callable, Generator
 
-from lukefi.metsi.core.collected_data import CollectableDataTypes
-from lukefi.metsi.core.condition import Condition, PostCondition
-from lukefi.metsi.core.db_utils import output_node_to_db
-from lukefi.metsi.core.exceptions import CancelTreatment, MetsiException
-from lukefi.metsi.core.model import ComputationalUnit
-from lukefi.metsi.core.operations import do_nothing
-from lukefi.metsi.core.simulation_payload import SimulationPayload
-from lukefi.metsi.core.treatment import Treatment
+from bscore.collected_data import CollectableDataTypes
+from bscore.condition import Condition, PostCondition
+from bscore.db_utils import output_node_to_db
+from bscore.exceptions import CancelTreatment, MetsiException
+from bscore.model import ComputationalUnit
+from bscore.operations import do_nothing
+from bscore.simulation_payload import SimulationPayload
+from bscore.treatment import Treatment
 
 T = TypeVar("T", bound=ComputationalUnit)
 
