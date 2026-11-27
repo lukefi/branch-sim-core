@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "BranchSimCore"
+description = "LUKE branching simulator core"
+version = "1.0.0"
+requires-python = "~=3.13"
+
+authors = [
+    { name = "Daniel Melander", email = "daniel.melander@luke.fi" },
+    { name = "Reetta Lempinen", email = "reetta.lempinen@luke.fi" },
+    { name = "Tapio Lempinen", email = "tapio.lempinen@luke.fi" },
+    { name = "Arto Haara", email = "arto.haara@luke.fi" },
+    { name = "Juho-Petteri Yliuntinen" },
+    { name = "Laura Jaakkola" },
+    { name = "Urho Niemelä" },
+    { name = "Ari-Antti Tervonen" },
+    { name = "Tapani Stylman" }
+]
+
+dependencies = [
+    "numpy~=2.4.5"
+]
+
+[tool.setuptools.package-dir]
+bscore = "bscore"
